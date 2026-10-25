@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bread Empire</title>
+<style>
+:root{--bg:#fff4e0;--card:#ffffff;--ink:#3b2a1a;--muted:#8a7560;--accent:#d9822b;--accent-ink:#ffffff;--line:#ecd9bd;--off:#e6dccb;--off-ink:#a39583;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1610;--card:#2b2018;--ink:#f5e6d0;--muted:#b09a82;--accent:#e8953f;--accent-ink:#1e1610;--line:#433325;--off:#3a2e24;--off-ink:#7d6c5a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1e1610;--card:#2b2018;--ink:#f5e6d0;--muted:#b09a82;--accent:#e8953f;--accent-ink:#1e1610;--line:#433325;--off:#3a2e24;--off-ink:#7d6c5a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center}
+main{width:100%;max-width:480px;padding:16px}
+h1{font-size:1.2rem;margin:0 0 12px;text-align:center}
+.stats{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.coins{font-size:2.2rem;font-weight:800;line-height:1.1}
+.rate{color:var(--muted);margin-top:4px}
+.tap-zone{position:relative;display:flex;justify-content:center;padding:22px 0}
+#bread{width:min(60vw,220px);height:min(60vw,220px);border-radius:50%;border:6px solid var(--accent);background:var(--card);font-size:min(28vw,110px);cursor:pointer;touch-action:manipulation;user-select:none;transition:transform .08s}
+#bread:active{transform:scale(.93)}
+.float{position:absolute;font-weight:800;color:var(--accent);pointer-events:none;animation:up .8s ease-out forwards}
+@keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+h2{font-size:1rem;margin:8px 0}
+.helper{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.helper .ico{font-size:2rem}
+.helper .info{flex:1;min-width:0}
+.helper .name{font-weight:700}
+.helper .sub{color:var(--muted);font-size:.85rem}
+.buy{border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:10px 14px;min-width:104px;white-space:pre-line;line-height:1.25;cursor:pointer;font-size:.95rem}
+.buy:disabled{background:var(--off);color:var(--off-ink);cursor:not-allowed}
+.foot{text-align:center;margin-top:18px}
+.reset{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer}
+.ver{color:var(--muted);font-size:.75rem;margin-top:8px}
+.modes{display:flex;gap:8px;margin-bottom:10px}
+.mode{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 0;font-weight:700;cursor:pointer;font-size:.95rem}
+.mode.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:360px;width:100%;text-align:center}
+.modal h3{margin:6px 0 10px;font-size:1.15rem}
+.modal p{margin:6px 0}
+.modal .muted{color:var(--muted);font-size:.8rem}
+.away-coins{font-size:2rem;font-weight:800;margin:8px 0}
+.tabs{display:flex;gap:6px;margin:6px 0 12px}
+.tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 4px;font-weight:700;cursor:pointer;font-size:.9rem}
+.tab.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.badge{font-size:.85rem;font-weight:700;color:var(--muted);min-width:64px;text-align:right}
+.helper.locked{opacity:.6}
+.helper.locked .ico{filter:grayscale(1)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.card h2{margin:0 0 8px}
+.card .sub{color:var(--muted);font-size:.8rem;margin:4px 0}
+.betrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.betrow input{width:96px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:1rem}
+.mini,.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mini:disabled,.chip:disabled,.betrow input:disabled{opacity:.55;cursor:not-allowed}
+.wheelbox{position:relative;width:min(80vw,300px);aspect-ratio:1;margin:14px auto 10px}
+#wheel-svg{width:100%;height:100%;display:block;border-radius:50%;box-shadow:0 4px 14px rgba(0,0,0,.4);transition-property:transform;transition-timing-function:cubic-bezier(.15,.65,.1,1);transition-duration:0s}
+.pointer{position:absolute;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:20px solid var(--accent);z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;height:30%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#fff;background:#555;border:4px solid var(--accent);z-index:1}
+.hub.red{background:#c62828}
+.hub.black{background:#212121}
+.hub.green{background:#2e7d32}
+#slot-info{white-space:pre-line}
+.clone{margin:0 0 10px}
+.clone .sub{color:var(--muted);font-size:.8rem;text-align:center;margin-top:4px}
+.ghost{position:fixed;left:0;top:0;z-index:30;font-size:1.9rem;pointer-events:none;opacity:.65;will-change:transform}
+.float.ghostf{color:#8e7cc3}
+.reels{display:flex;gap:10px;justify-content:center;margin:10px 0}
+.reel{width:72px;height:84px;font-size:2.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--bg);border:3px solid var(--accent);border-radius:12px}
+.big{width:100%;padding:12px;font-size:1rem}
+.msg{margin-top:8px;font-weight:700;min-height:1.3em}
+.vip{position:fixed;left:0;top:0;z-index:40;width:70px;height:70px;padding:0;font-size:2.4rem;background:var(--accent);border:3px solid var(--card);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;will-change:transform;touch-action:manipulation;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:10px 16px;border-radius:12px;z-index:60;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <h1>🥖 Bread Empire</h1>
+  <section class="stats">
+    <div class="coins">🪙 <span id="coins">0</span></div>
+    <div class="rate"><span id="cps">0</span> monedas por segundo · +<span id="tapv">1</span> por toque</div>
+  </section>
+  <div class="tap-zone" id="zone">
+    <button id="bread" aria-label="Hacer pan">🍞</button>
+  </div>
+  <div class="clone" id="clone" style="display:none"><button class="buy big" id="clone-btn"></button><div class="sub" id="clone-sub"></div></div>
+  <div class="tabs">
+    <button class="tab on" data-t="up">🛒 Mejoras</button>
+    <button class="tab" data-t="ach">🏆 Logros</button>
+    <button class="tab" data-t="stars" id="tab-btn-stars" style="display:none">⭐ Estrellas</button>
+    <button class="tab" data-t="casino">🎰 Casino</button>
+  </div>
+  <div class="panel" id="panel-up">
+  <div class="modes"><button class="mode" data-m="1">×1</button><button class="mode" data-m="10">×10</button><button class="mode" data-m="max">Máx</button></div>
+  <h2 id="h-auto">Mejoras automáticas</h2>
+  <div id="list-auto"></div>
+  <h2 id="h-bonus">Mejoras de bonus</h2>
+  <div id="list-bonus"></div>
+  <h2 id="h-up">Mejoras especiales</h2>
+  <div id="list-up"></div>
+  <div class="ver" id="up-count"></div>
+  </div>
+  <div class="panel" id="panel-ach" style="display:none">
+    <div class="ver" id="ach-count" style="margin:0 0 10px"></div>
+    <div id="list-ach"></div>
+  </div>
+  <div class="panel" id="panel-stars" style="display:none">
+  <h2 id="h-stars">⭐ Estrellas</h2>
+  <div class="helper" id="stars-box">
+    <div class="ico">⭐</div>
+    <div class="info"><div class="name">Tienes <span id="stars-n">0</span> ⭐</div><div class="sub" id="stars-sub"></div></div>
+    <button class="buy" id="stars-btn"></button>
+  </div>
+  </div>
+  <div class="panel" id="panel-casino" style="display:none">
+    <div class="card">
+      <b>Tu apuesta</b>
+      <div class="betrow">
+        <input id="bet" type="number" min="1" step="1" inputmode="numeric" value="10">
+        <button class="mini" data-b="min" title="Apuesta mínima: 1 moneda">Mín</button><button class="mini" data-b="half" title="La mitad de lo que tenías puesto">Mitad</button><button class="mini" data-b="dbl" title="El doble de lo que tenías puesto">Doble</button><button class="mini" data-b="all" title="Todas tus monedas">Todo</button>
+      </div>
+      <div class="sub">Si ganas, cobras tu apuesta × el número (×2 = el doble). Si pierdes, la pierdes.</div>
+      <div class="sub">Tus ganancias netas (lo que ganas menos lo que pierdes) cuentan para estrellas y logros.</div>
+    </div>
+    <div class="card">
+      <h2>🎡 Ruleta</h2>
+      <div class="sub">Elige una apuesta y gira. Gana el número bajo la flecha.</div>
+      <div class="wheelbox"><div class="pointer"></div><svg id="wheel-svg" viewBox="0 0 200 200"></svg><div class="hub" id="roul-ball">?</div></div>
+      <div class="chips" id="roul-opts"></div>
+      <div class="betrow"><input id="roul-num" type="number" min="0" max="36" step="1" inputmode="numeric" placeholder="0–36"><span class="sub">← tu número (0–36)</span></div>
+      <div class="sub" id="roul-info"></div>
+      <button class="buy big" id="roul-go">Girar</button>
+      <div class="msg" id="roul-msg"></div>
+    </div>
+    <div class="card">
+      <h2>🎰 Tragaperras</h2>
+      <div class="reels"><div class="reel" id="reel0">?</div><div class="reel" id="reel1">?</div><div class="reel" id="reel2">?</div></div>
+      <div class="sub" id="slot-info"></div>
+      <button class="buy big" id="slot-go">Tirar</button>
+      <div class="msg" id="slot-msg"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="foot">
+    <button class="reset" id="reset">Borrar partida</button>
+    <div class="ver">Se guarda sola cada 10 segundos</div>
+  </div>
+</main>
+<div class="overlay" id="away" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div style="font-size:2.4rem">🌙</div>
+    <h3>¡Mientras no estabas, tu panadería trabajó!</h3>
+    <p>Estuviste fuera <b id="away-time"></b> y ganaste</p>
+    <div class="away-coins">🪙 <span id="away-coins">0</span></div>
+    <p class="muted">Sin ti trabaja a medio ritmo y hasta un máximo de 8 horas.</p>
+    <button class="buy" id="away-ok">¡Genial!</button>
+  </div>
+</div>
+<script>
+// ====== DATOS (aquí se cambia el equilibrio, sin tocar la lógica) ======
+const VERSION = 1;
+const SAVE_KEY = "panaderia-idle-save";
+const TAP_VALUE = 1;
+const COST_GROWTH = 1.15;
+const AUTOSAVE_MS = 10000;
+const VIP_MIN_S = 240;       // el cliente VIP aparece cada 240 s (4 min) desde que salió el anterior
+const VIP_MAX_S = 240;
+const VIP_BOUNCES = 5;  // rebota 5 veces en los bordes del juego y desaparece
+const VIP_SPEED = 260;      // velocidad: píxeles por segundo
+const VIP_SIZE = 70;        // tamaño del cliente (igual que en el CSS de .vip)
+const VIP_SECONDS = 60;     // da 60 s de producción (monedas/s + 1 toque/s)
+const CLONE_BASE_COST = 10000000; // Clonación del Cursor: precio del primer uso (cada uso cuesta el doble)
+const PRODUCTION_SCALE = 0.2;     // ritmo de la economía: producción de las mejoras (0,2 = una quinta parte)
+const STAR_ROOT = 3;            // estrellas = (monedas ganadas / 1.000.000) ^ (1/3): más suave que la raíz cuadrada
+const STAR_COST_BASE = 1000000; // estrellas = raíz cúbica de (monedas ganadas / 1.000.000)
+// ====== CASINO (todo se cambia aquí) ======
+const ZERO_CHANCE = 0.01;   // probabilidad del 0 verde (1 %)
+const PAY_COLOR = 2, PAY_DOZEN = 3, PAY_NUMBER = 36, PAY_ZERO = 100;
+const SLOT_SYMBOLS = 11;    // cada rodillo da un número de 0 a 10
+const SLOT_PAY = { pair: 3, pair7: 8, triple: 10, triple7: 25 };
+const ROULETTE_MS = 4000, SLOT_STOP_MS = [900, 1400, 1900];
+const STAR_BONUS = 0.05;        // cada estrella: +5 % a toda la producción
+const REVEAL_RATIO = 0.7; // un ayudante aparece al tener el 70 % de su precio
+const OFFLINE_RATE = 0.5;              // sin ti se gana la mitad
+const OFFLINE_CAP_SECONDS = 8 * 3600;  // tope de ausencia que cuenta: 8 horas
+const OFFLINE_MIN_SECONDS = 60;        // menos que esto no se considera "estar fuera"
+const HELPERS = [
+  { id: "aprendiz", name: "Aprendiz", emoji: "🧑‍🍳", kind: "auto", baseCost: 15, cps: 0.05, desc: "Amasa pan sin parar." },
+  { id: "horno", name: "Horno pequeño", emoji: "🔥", kind: "bonus", baseCost: 100, tap: 0.5, desc: "Hornea sin descanso." },
+  { id: "panadero", name: "Panadero", emoji: "👨‍🍳", kind: "auto", baseCost: 1100, cps: 4, desc: "Un profesional del pan." },
+  { id: "cafeteria", name: "Cafetería", emoji: "☕", kind: "bonus", baseCost: 12000, tap: 12.5, desc: "Pan con café para todos." },
+  { id: "fabrica", name: "Fábrica de pan", emoji: "🏭", kind: "bonus", baseCost: 130000, tap: 65, desc: "Pan a gran escala." },
+  { id: "franquicia", name: "Franquicia", emoji: "🏬", kind: "bonus", baseCost: 1400000, tap: 350, desc: "Panaderías por todo el país." },
+  { id: "panjimbo", name: "Pan Jimbo", emoji: "🏢", kind: "bonus", baseCost: 150000000, tap: 9000, desc: "Compras a tu rival y su gente trabaja para ti." }
+];
+
+// ====== MEJORAS ESPECIALES (compra única) ======
+// type: "tap" (toque x2) · "tapPct" (1 % de monedas/s por toque) · "global" (+% a todo) · "helper" (duplica una mejora)
+const HELPER_TIERS = [
+  { n: 10, costX: 20, roman: "I" },
+  { n: 25, costX: 100, roman: "II" },
+  { n: 50, costX: 1000, roman: "III" }
+];
+const UPGRADES = [
+  { id: "manos-fuertes", type: "tapPct", pct: 0.15, name: "Manos fuertes", emoji: "💪", cost: 500, desc: "Cada toque suma un 15 % de tus monedas por segundo." },
+  { id: "manos-oro", type: "tap", name: "Manos de oro", emoji: "🥇", cost: 25000, desc: "Cada toque da el doble." },
+  { id: "amasado", type: "tapPct", pct: 0.005, name: "Amasado experto", emoji: "🥖", cost: 50000, desc: "Cada toque suma un 0,5 % de tus monedas por segundo." },
+  { id: "receta", type: "global", pct: 0.25, name: "Receta secreta", emoji: "📜", cost: 10000, desc: "+25 % a toda la producción." },
+  { id: "letrero", type: "global", pct: 0.2, name: "Letrero luminoso", emoji: "💡", cost: 200000, desc: "+20 % a toda la producción." }
+];
+for (const h of HELPERS) {
+  for (const t of HELPER_TIERS) {
+    UPGRADES.push({
+      id: h.id + "-" + t.n, type: "helper", helperId: h.id, needN: t.n,
+      name: h.name + " mejorado " + t.roman, emoji: h.emoji, cost: h.baseCost * t.costX,
+      desc: (h.kind === "bonus" ? "Duplica el bonus por toque de cada " : "Duplica lo que produce cada ") + h.name + "."
+    });
+  }
+}
+// Todos los precios de las mejoras especiales se multiplican por este número (también afecta a cuándo aparecen)
+const UPGRADE_COST_MULT = 3 * 1.7; // ×3 y, además, +70 %
+for (const u of UPGRADES) u.cost = Math.round(u.cost * UPGRADE_COST_MULT);
+// Manos fuertes y Manos de oro cuestan 10 veces más
+const TAP_UPGRADE_COST_X = 10;
+for (const u of UPGRADES) if (u.type === "tap") u.cost *= TAP_UPGRADE_COST_X;
+// Precios fijados a mano: mandan sobre las multiplicaciones de arriba
+const FIXED_PRICES = { "manos-fuertes": 25500, "receta": 100000, "amasado": 255000, "letrero": 1020000, "aprendiz-10": 5000 };
+for (const u of UPGRADES) if (u.id in FIXED_PRICES) u.cost = FIXED_PRICES[u.id];
+
+// ====== EXPANSIONES (para llegar a los septillones) y PAN JIMBO ======
+// Cada expansión multiplica TODA la producción por EXPANSION_MULT y cuesta EXPANSION_RATIO veces más que la anterior.
+// (12 en vez de 10 porque, con más dinero, también compras más unidades y la producción crece algo más que ×10 por escalón)
+// Así cada salto tarda más o menos lo mismo en cualquier punto del juego.
+const EXPANSION_COST0 = 70000000, EXPANSION_MULT = 10, EXPANSION_RATIO = 12;
+const EXPANSIONS = [
+  ["Segunda sucursal", "🏪"], ["Panadería en cada barrio", "🏘️"], ["Cadena regional", "🗺️"], ["Cadena nacional", "🏙️"],
+  ["Salto a Europa", "🌍"], ["Conquista de América", "🌎"], ["Mercado mundial", "🌐"], ["Fábricas robotizadas", "🤖"],
+  ["Flota de camiones", "🚚"], ["Aviones de pan", "✈️"], ["Satélites panaderos", "🛰️"], ["Base lunar", "🌙"],
+  ["Trigo en Marte", "🚀"], ["Colonias solares", "☀️"], ["Esfera de Dyson", "🔆"], ["Imperio galáctico", "🌌"],
+  ["Pan cuántico", "⚛️"], ["Multiverso panadero", "♾️"]
+];
+EXPANSIONS.forEach((e, i) => UPGRADES.push({
+  id: "exp-" + (i + 1), type: "expand", mult: EXPANSION_MULT, name: e[0], emoji: e[1],
+  cost: EXPANSION_COST0 * Math.pow(EXPANSION_RATIO, i), desc: "Toda tu producción ×" + EXPANSION_MULT + "."
+}));
+
+// ====== LOGROS (cada uno da +1 % a toda la producción y se conserva al reiniciar) ======
+// type: taps | lifetime (monedas ganadas en total) | helpers (mejoras a la vez) | kinds (tipos distintos) | upgrades | vips | stars
+const ACH_BONUS = 0.01;
+const ACHIEVEMENTS = [
+  { id: "taps-1", type: "taps", n: 1, name: "Primer pan", emoji: "🍞", desc: "Toca el pan por primera vez." },
+  { id: "taps-100", type: "taps", n: 100, name: "Manos a la masa", emoji: "🙌", desc: "Toca el pan 100 veces." },
+  { id: "taps-1000", type: "taps", n: 1000, name: "Dedos de harina", emoji: "🌾", desc: "Toca el pan 1.000 veces." },
+  { id: "life-1k", type: "lifetime", n: 1000, name: "Primeras ventas", emoji: "🪙", desc: "Gana 1.000 monedas en total." },
+  { id: "life-100k", type: "lifetime", n: 100000, name: "Negocio en marcha", emoji: "🏪", desc: "Gana 100.000 monedas en total." },
+  { id: "life-1m", type: "lifetime", n: 1000000, name: "Millonario del pan", emoji: "💰", desc: "Gana 1 millón de monedas en total." },
+  { id: "life-1b", type: "lifetime", n: 1e9, name: "Imperio panadero", emoji: "👑", desc: "Gana 1.000 millones de monedas en total." },
+  { id: "help-10", type: "helpers", n: 10, name: "Equipo pequeño", emoji: "👥", desc: "Ten 10 mejoras automáticas y de bonus a la vez." },
+  { id: "help-50", type: "helpers", n: 50, name: "Plantilla grande", emoji: "🏢", desc: "Ten 50 mejoras automáticas y de bonus a la vez." },
+  { id: "help-200", type: "helpers", n: 200, name: "Gran empresa", emoji: "🏙️", desc: "Ten 200 mejoras automáticas y de bonus a la vez." },
+  { id: "kinds-all", type: "kinds", n: HELPERS.length, name: "Un poco de todo", emoji: "🧺", desc: "Ten al menos una de cada mejora automática y de bonus." },
+  { id: "up-1", type: "upgrades", n: 1, name: "Primera mejora especial", emoji: "🔧", desc: "Compra una mejora especial." },
+  { id: "up-10", type: "upgrades", n: 10, name: "Coleccionista", emoji: "🧰", desc: "Compra 10 mejoras especiales." },
+  { id: "up-all", type: "upgrades", n: UPGRADES.length, name: "Todas las mejoras", emoji: "🎖️", desc: "Compra todas las mejoras especiales." },
+  { id: "vip-1", type: "vips", n: 1, name: "¡Cliente VIP!", emoji: "🤵", desc: "Atrapa a un cliente VIP." },
+  { id: "vip-10", type: "vips", n: 10, name: "Cliente favorito", emoji: "🎩", desc: "Atrapa a 10 clientes VIP." },
+  { id: "star-1", type: "stars", n: 1, name: "Primera estrella", emoji: "⭐", desc: "Consigue tu primera estrella." },
+  { id: "star-5", type: "stars", n: 5, name: "Cielo estrellado", emoji: "🌟", desc: "Consigue 5 estrellas." },
+  // --- logros de más adelante: comparaciones con el mundo y con los millonarios (cifras aproximadas) ---
+  { id: "life-10m", type: "lifetime", n: 1e7, name: "Millonario de los de verdad", emoji: "💵", desc: "Gana 10 millones: diez veces lo que sueña mucha gente. ¡Esto no ha hecho más que empezar!" },
+  { id: "life-10b", type: "lifetime", n: 1e10, name: "Club de multimillonarios", emoji: "🥂", desc: "Gana 10.000 millones: diez multimillonarios en uno. ¡Vas en serio!" },
+  { id: "life-400b", type: "lifetime", n: 4e11, name: "Más rico que el más rico", emoji: "💎", desc: "Gana 400.000 millones: más que la mayor fortuna personal del mundo (más o menos). ¡Nadie te para!" },
+  { id: "life-1t", type: "lifetime", n: 1e12, name: "Un billón de monedas", emoji: "🏛️", desc: "Gana 1 billón: lo que produce un país grande en un año (más o menos). ¡Sigue así!" },
+  { id: "life-25t", type: "lifetime", n: 2.5e13, name: "Dueño de todo el oro", emoji: "🥇", desc: "Gana 25 billones: más que todo el oro extraído en la historia (más o menos). ¡Brillas, campeón!" },
+  { id: "life-100t", type: "lifetime", n: 1e14, name: "Toda la economía del planeta", emoji: "🌐", desc: "Gana 100 billones: más que todo lo que produce el mundo en un año (más o menos). ¡Increíble!" },
+  { id: "life-450t", type: "lifetime", n: 4.5e14, name: "Dueño del mundo", emoji: "🌎", desc: "Gana 450 billones: más que toda la riqueza del planeta (más o menos). ¡Y aún quedan galaxias!" },
+  { id: "life-sand", type: "lifetime", n: 7.5e18, name: "Granos de arena", emoji: "🏖️", desc: "Gana 7,5 trillones: una moneda por cada grano de arena de la Tierra (más o menos). ¡Imparable!" },
+  { id: "life-1e21", type: "lifetime", n: 1e21, name: "La caja fuerte pide ampliación", emoji: "📦", desc: "Gana mil trillones: tu caja fuerte ya no cabe en ningún edificio. ¡Casi en la cima!" },
+  { id: "life-1e24", type: "lifetime", n: 1e24, name: "Septillonario", emoji: "🌌", desc: "Gana un 1 seguido de 24 ceros (Sp): más monedas que estrellas en el universo visible (más o menos). ¡Eres leyenda!" },
+  // --- logros graciosos y de camino ---
+  { id: "taps-10k", type: "taps", n: 10000, name: "Dedo de acero", emoji: "💪", desc: "Toca el pan 10.000 veces. Tu dedo pide vacaciones, pero tú sigues." },
+  { id: "taps-100k", type: "taps", n: 100000, name: "Dedo biónico", emoji: "🦾", desc: "Toca el pan 100.000 veces. ¿Seguro que eres humano?" },
+  { id: "vip-25", type: "vips", n: 25, name: "Famoso del barrio", emoji: "🕴️", desc: "Atrapa a 25 clientes VIP. Ya te piden autógrafos." },
+  { id: "clone-1", type: "clones", n: 1, name: "¿Quién es el real?", emoji: "👻", desc: "Usa la Clonación del Cursor. Ahora tienes más manos que un pulpo." },
+  { id: "casino-1", type: "casino", n: 1, name: "Suerte de principiante", emoji: "🍀", desc: "Gana tu primera apuesta en el casino. ¡La suerte te sonríe!" },
+  { id: "jimbo", type: "own", uid: "panjimbo", n: 1, name: "Adiós, Pan Jimbo", emoji: "🏢", desc: "Compra tu primer Pan Jimbo. Tu competencia llora, tú comes pan." },
+  { id: "exp-first", type: "expands", n: 1, name: "Primera expansión", emoji: "🏪", desc: "Compra tu primera expansión. Ya no eres solo una panadería." },
+  { id: "exp-all", type: "expands", n: EXPANSIONS.length, name: "Pan para todo el multiverso", emoji: "♾️", desc: "Compra todas las expansiones. Ya no queda nadie sin pan." },
+  { id: "star-25", type: "stars", n: 25, name: "Constelación", emoji: "✨", desc: "Consigue 25 estrellas. Ya eres una constelación entera." },
+  { id: "star-100", type: "stars", n: 100, name: "Vía Láctea", emoji: "🌠", desc: "Consigue 100 estrellas. ¡Brillas más que el sol!" },
+  { id: "help-500", type: "helpers", n: 500, name: "Panadería abarrotada", emoji: "🥵", desc: "Ten 500 mejoras automáticas y de bonus a la vez. Ya no cabe ni un panadero más." }
+];
+
+// ====== ESTADO ======
+function defaultState() {
+  return { version: VERSION, coins: 0, totalEarned: 0, owned: {}, revealed: {}, upgrades: {}, stars: 0, lifetime: 0, taps: 0, vips: 0, achievements: {}, cloneCost: CLONE_BASE_COST, casinoRun: 0, casinoLife: 0, casinoWins: 0, cloneUses: 0, buyMode: "1", lastTick: Date.now() };
+}
+let state = defaultState();
+
+function num(n, fallback) { return Number.isFinite(n) ? n : (fallback || 0); }
+
+// ====== FORMATO DE NÚMEROS ======
+const SUF = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+function fmt(n) {
+  n = Math.max(0, num(n));
+  if (n < 1000) return String(Math.floor(n));
+  const i = Math.min(Math.floor(Math.log10(n) / 3), SUF.length - 1);
+  const v = n / Math.pow(1000, i);
+  let s;
+  if (v < 10) s = (Math.floor(v * 100) / 100).toFixed(2);
+  else if (v < 100) s = (Math.floor(v * 10) / 10).toFixed(1);
+  else s = String(Math.floor(v));
+  return s.replace(".", ",") + SUF[i];
+}
+function fmtRate(n) {
+  n = Math.max(0, num(n));
+  if (n >= 100) return fmt(n);
+  const d = n < 1 ? 100 : 10; // hasta 2 decimales por debajo de 1 y 1 decimal por debajo de 100
+  return String(Math.floor(n * d + 1e-9) / d).replace(".", ",");
+}
+
+// ====== LÓGICA ======
+function owned(id) { return Math.max(0, Math.floor(num(state.owned[id]))); }
+function cost(h) { return Math.floor(h.baseCost * Math.pow(COST_GROWTH, owned(h.id))); }
+function bought(id) { return state.upgrades[id] === true; }
+// Lo que suma DE VERDAD una unidad más de una mejora (por toque o por segundo), con todas tus mejoras ya aplicadas
+function unitGain(h) {
+  const f = h.kind === "bonus" ? tapValue : totalCps;
+  const before = f();
+  state.owned[h.id] = owned(h.id) + 1;
+  const after = f();
+  state.owned[h.id] = owned(h.id) - 1;
+  return Math.max(0, after - before);
+}
+// Lo que sumaría de verdad comprar una mejora especial, con todo lo que ya tienes
+function upEffect(u) {
+  const t0 = tapValue(), c0 = totalCps();
+  state.upgrades[u.id] = true;
+  const dt = tapValue() - t0, dc = totalCps() - c0;
+  delete state.upgrades[u.id];
+  const p = [];
+  if (dt > 0.0005) p.push("+" + fmtRate(dt) + " por toque");
+  if (dc > 0.0005) p.push("+" + fmtRate(dc) + "/s");
+  return p.length ? " Ahora: " + p.join(" y ") + "." : "";
+}
+// Cada mejora "helper" comprada duplica lo que da esa mejora (x2, x4, x8)
+function helperMult(h) {
+  let m = 1;
+  for (const u of UPGRADES) if (u.type === "helper" && u.helperId === h.id && bought(u.id)) m *= 2;
+  return m;
+}
+// Multiplicador global: 1 + suma de los bonus (+25 %, +50 %)
+function globalMult() {
+  let g = 1;
+  for (const u of UPGRADES) if (u.type === "global" && bought(u.id)) g += u.pct;
+  let e = 1; // expansiones: cada una multiplica TODA la producción
+  for (const u of UPGRADES) if (u.type === "expand" && bought(u.id)) e *= u.mult;
+  return g * e * (1 + STAR_BONUS * state.stars) * (1 + ACH_BONUS * achCount());
+}
+// Monedas por segundo sin el multiplicador global
+function cpsBase() {
+  let t = 0;
+  for (const h of HELPERS) if (h.kind === "auto") t += owned(h.id) * h.cps * helperMult(h) * PRODUCTION_SCALE;
+  return num(t);
+}
+function totalCps() { return num(cpsBase() * globalMult()); }
+// Monedas por toque: ((base + bonus) x mejoras de toque + % de monedas/s) x global
+function tapValue() {
+  let b = TAP_VALUE, tm = 1, pct = 0;
+  for (const h of HELPERS) if (h.kind === "bonus") b += owned(h.id) * h.tap * helperMult(h) * PRODUCTION_SCALE;
+  for (const u of UPGRADES) {
+    if (!bought(u.id)) continue;
+    if (u.type === "tap") tm *= 2;
+    if (u.type === "tapPct") pct += u.pct;
+  }
+  return num((b * tm + cpsBase() * pct) * globalMult(), TAP_VALUE);
+}
+function addCoins(x) {
+  x = num(x);
+  if (x <= 0) return;
+  state.coins += x;
+  state.totalEarned += x;
+  state.lifetime += x;
+}
+// Calcula cuántos se compran y cuánto cuestan según el modo ("1", "10" o "max")
+function bulk(h, mode) {
+  const have = owned(h.id);
+  const unit = (i) => Math.floor(h.baseCost * Math.pow(COST_GROWTH, have + i));
+  let n = 0, total = 0;
+  if (mode === "max") {
+    while (n < 10000) {
+      const c = unit(n);
+      if (total + c > state.coins) break;
+      total += c; n++;
+    }
+    if (n === 0) return { n: 1, total: unit(0) }; // se muestra el siguiente, apagado
+    return { n: n, total: total };
+  }
+  const want = mode === "10" ? 10 : 1;
+  for (let i = 0; i < want; i++) total += unit(i);
+  return { n: want, total: total };
+}
+function buy(h) {
+  const b = bulk(h, state.buyMode);
+  if (state.coins < b.total) return; // nunca se compra sin dinero
+  state.coins -= b.total;
+  state.owned[h.id] = owned(h.id) + b.n;
+  render();
+}
+// ====== PROGRESO OFFLINE ======
+function fmtTime(s) {
+  s = Math.floor(num(s));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h > 0 ? h + " h" + (m ? " " + m + " min" : "") : m > 0 ? m + " min" : s + " s";
+}
+function showAway(dt, gain) {
+  $("away-time").textContent = fmtTime(dt);
+  $("away-coins").textContent = fmt(gain);
+  $("away").style.display = "flex";
+}
+// dt = segundos que pasaron sin que el juego corriera (pestaña cerrada o congelada)
+function giveOffline(dt) {
+  hideVip(); scheduleVip(); // tras una ausencia, el VIP vuelve a esperar su turno
+  const secs = Math.min(dt, OFFLINE_CAP_SECONDS);
+  const gain = num(totalCps() * secs * OFFLINE_RATE);
+  if (gain > 0) { addCoins(gain); showAway(dt, gain); }
+  render();
+}
+function tick() {
+  const now = Date.now();
+  let dt = (now - num(state.lastTick, now)) / 1000;
+  if (!(dt > 0)) dt = 0;          // reloj hacia atrás o NaN -> 0
+  state.lastTick = now;
+  if (dt >= OFFLINE_MIN_SECONDS) { giveOffline(dt); return; }
+  addCoins(totalCps() * dt);
+  if (!vipEl && !document.hidden && now >= nextVipAt) spawnVip();
+  render();
+}
+
+// ====== GUARDADO ======
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (!d || typeof d !== "object") return;
+    const s = defaultState();
+    s.coins = Math.max(0, num(d.coins));
+    s.totalEarned = Math.max(0, num(d.totalEarned));
+    if (d.owned && typeof d.owned === "object") {
+      for (const h of HELPERS) s.owned[h.id] = Math.max(0, Math.floor(num(d.owned[h.id])));
+    }
+    if (d.revealed && typeof d.revealed === "object") {
+      for (const k of Object.keys(d.revealed)) if (d.revealed[k] === true) s.revealed[k] = true;
+    }
+    if (d.upgrades && typeof d.upgrades === "object") {
+      for (const u of UPGRADES) if (d.upgrades[u.id] === true) s.upgrades[u.id] = true;
+    }
+    if (["1", "10", "max"].includes(d.buyMode)) s.buyMode = d.buyMode;
+    s.lifetime = Math.max(num(d.lifetime), s.totalEarned); // partidas antiguas: al menos lo de esta partida
+    s.taps = Math.max(0, Math.floor(num(d.taps)));
+    s.vips = Math.max(0, Math.floor(num(d.vips)));
+    if (d.achievements && typeof d.achievements === "object") {
+      for (const a of ACHIEVEMENTS) if (d.achievements[a.id] === true) s.achievements[a.id] = true;
+    }
+    s.cloneCost = Math.max(CLONE_BASE_COST, num(d.cloneCost, CLONE_BASE_COST));
+    s.casinoRun = num(d.casinoRun);
+    s.casinoLife = num(d.casinoLife);
+    s.casinoWins = Math.max(0, Math.floor(num(d.casinoWins)));
+    s.cloneUses = Math.max(0, Math.floor(num(d.cloneUses)));
+    s.stars = Math.max(0, Math.floor(num(d.stars)));
+    const t = num(d.lastTick, 0);
+    if (t > 0 && t <= Date.now()) s.lastTick = t; // si es del futuro (reloj raro) se ignora
+    state = s; // el tick de arranque calcula el progreso offline
+  } catch (e) {}
+}
+
+// ====== PANTALLA ======
+const $ = (id) => document.getElementById(id);
+const rows = {};
+function buildHelpers() {
+  for (const h of HELPERS) {
+    const row = document.createElement("div");
+    row.className = "helper";
+    row.innerHTML =
+      '<div class="ico">' + h.emoji + '</div>' +
+      '<div class="info"><div class="name"></div><div class="sub"></div></div>' +
+      '<button class="buy"></button>';
+    row.querySelector(".buy").addEventListener("click", () => buy(h));
+    $(h.kind === "bonus" ? "list-bonus" : "list-auto").appendChild(row);
+    rows[h.id] = {
+      row: row,
+      name: row.querySelector(".name"),
+      sub: row.querySelector(".sub"),
+      btn: row.querySelector(".buy")
+    };
+  }
+}
+function render() {
+  const shownCoins = Math.max(0, state.coins - casinoHold); // casinoHold: premio aún en la animación
+  $("coins").textContent = shownCoins < 10 ? fmtRate(shownCoins) : fmt(shownCoins);
+  $("cps").textContent = fmtRate(totalCps());
+  $("tapv").textContent = fmtRate(tapValue());
+  document.querySelectorAll(".mode").forEach((m) => m.classList.toggle("on", m.dataset.m === state.buyMode));
+  for (const h of HELPERS) {
+    const r = rows[h.id], b = bulk(h, state.buyMode), c = b.total;
+    // Aparece al llegar al 70 % de su precio (el primero siempre) y ya no se vuelve a ocultar
+    if (!state.revealed[h.id] && (h === HELPERS[0] || state.coins >= REVEAL_RATIO * h.baseCost)) state.revealed[h.id] = true;
+    r.row.style.display = state.revealed[h.id] ? "" : "none";
+    r.name.textContent = h.name + " ×" + owned(h.id);
+    r.sub.textContent = h.desc + (h.kind === "bonus" ? " (ahora +" + fmtRate(unitGain(h)) + " por toque cada uno)" : " (ahora " + fmtRate(unitGain(h)) + "/s cada uno)");
+    r.btn.textContent = (state.buyMode === "1" ? "" : "×" + b.n + "\n") + "🪙 " + fmt(c);
+    r.btn.disabled = state.coins < c;
+  }
+  // Cada título solo se ve si ya hay alguna mejora de ese tipo visible
+  for (const k of ["auto", "bonus"]) {
+    const any = HELPERS.some((h) => h.kind === k && state.revealed[h.id]);
+    $("h-" + k).style.display = any ? "" : "none";
+  }
+  renderUpgrades();
+  renderStars();
+  checkAchievements();
+  renderAchievements();
+  renderClone();
+}
+
+// ====== MEJORAS ESPECIALES: pantalla y compra ======
+const upRows = {};
+function buildUpgrades() {
+  const box = $("list-up");
+  for (const u of [...UPGRADES].sort((a, b) => a.cost - b.cost)) {
+    const row = document.createElement("div");
+    row.className = "helper";
+    row.innerHTML =
+      '<div class="ico">' + u.emoji + '</div>' +
+      '<div class="info"><div class="name"></div><div class="sub"></div></div>' +
+      '<button class="buy"></button>';
+    row.querySelector(".name").textContent = u.name;
+    row.querySelector(".sub").textContent = u.desc;
+    row.querySelector(".buy").addEventListener("click", () => buyUpgrade(u));
+    box.appendChild(row);
+    upRows[u.id] = { row: row, sub: row.querySelector(".sub"), btn: row.querySelector(".buy") };
+  }
+}
+function buyUpgrade(u) {
+  if (bought(u.id) || state.coins < u.cost) return; // nunca se compra sin dinero ni dos veces
+  state.coins -= u.cost;
+  state.upgrades[u.id] = true;
+  render();
+}
+function renderUpgrades() {
+  let shown = 0, got = 0;
+  for (const u of UPGRADES) {
+    const r = upRows[u.id];
+    if (bought(u.id)) { got++; r.row.style.display = "none"; continue; }
+    if (!state.revealed[u.id]) {
+      // las de mejora aparecen al tener la cantidad; las demás, al llegar al 70 % de su precio
+      const ok = u.type === "helper" ? owned(u.helperId) >= u.needN : state.coins >= REVEAL_RATIO * u.cost;
+      if (ok) state.revealed[u.id] = true;
+    }
+    const vis = state.revealed[u.id] === true;
+    r.row.style.display = vis ? "" : "none";
+    if (vis) {
+      shown++;
+      r.sub.textContent = u.desc + upEffect(u);
+      r.btn.textContent = "🪙 " + fmt(u.cost);
+      r.btn.disabled = state.coins < u.cost;
+    }
+  }
+  $("h-up").style.display = shown > 0 ? "" : "none";
+  $("up-count").textContent = got > 0 ? "Mejoras especiales compradas: " + got + " de " + UPGRADES.length : "";
+}
+
+// ====== CLIENTE VIP ======
+let nextVipAt = 0, vipEl = null, vipRaf = 0;
+function scheduleVip() { nextVipAt = Date.now() + (VIP_MIN_S + Math.random() * (VIP_MAX_S - VIP_MIN_S)) * 1000; }
+function hideVip() { cancelAnimationFrame(vipRaf); if (vipEl) { vipEl.remove(); vipEl = null; } }
+// Zona por la que se mueve: el ancho del juego y el alto de la pantalla
+function vipArea() {
+  const m = document.querySelector("main").getBoundingClientRect();
+  return { l: Math.max(0, m.left), r: Math.min(window.innerWidth, m.right), t: 0, b: window.innerHeight };
+}
+// Los avisos se muestran de uno en uno (máximo 4 en cola) para que no se tapen entre ellos
+const toastQ = [];
+let toastBusy = false;
+function showToast(msg) {
+  if (toastQ.length >= 4) toastQ.shift();
+  toastQ.push(msg);
+  if (!toastBusy) nextToast();
+}
+function nextToast() {
+  const t = $("toast");
+  if (!toastQ.length) { toastBusy = false; t.style.display = "none"; return; }
+  toastBusy = true;
+  t.textContent = toastQ.shift();
+  t.style.display = "block";
+  setTimeout(nextToast, 2200);
+}
+function vipReward() { return num((totalCps() + tapValue()) * VIP_SECONDS); }
+function spawnVip() {
+  hideVip();
+  scheduleVip(); // el siguiente sale 4 min después de que aparezca este
+  const el = document.createElement("button");
+  el.className = "vip";
+  el.textContent = "🤵";
+  el.setAttribute("aria-label", "Cliente VIP");
+  el.addEventListener("click", () => {
+    const r = vipReward();
+    state.vips += 1;
+    addCoins(r);
+    showToast("¡Cliente VIP! +" + fmt(r) + " monedas");
+    hideVip(); render();
+  });
+  document.body.appendChild(el);
+  vipEl = el;
+  // Sale en un punto al azar, en una dirección al azar, y rebota en los bordes del juego
+  const a = vipArea(), maxX = a.r - a.l - VIP_SIZE, maxY = a.b - a.t - VIP_SIZE;
+  let x = a.l + Math.random() * maxX, y = a.t + Math.random() * maxY;
+  const ang = Math.random() * 2 * Math.PI, minV = VIP_SPEED * 0.3; // evita trayectorias casi rectas
+  let vx = Math.cos(ang) * VIP_SPEED, vy = Math.sin(ang) * VIP_SPEED;
+  if (Math.abs(vx) < minV) vx = (vx < 0 ? -1 : 1) * minV;
+  if (Math.abs(vy) < minV) vy = (vy < 0 ? -1 : 1) * minV;
+  let bounces = 0, last = performance.now();
+  const place = () => { el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)"; };
+  const step = (now) => {
+    if (vipEl !== el) return;
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    x += vx * dt; y += vy * dt;
+    if (x < a.l) { x = a.l; vx = Math.abs(vx); bounces++; }
+    else if (x > a.l + maxX) { x = a.l + maxX; vx = -Math.abs(vx); bounces++; }
+    if (y < a.t) { y = a.t; vy = Math.abs(vy); bounces++; }
+    else if (y > a.t + maxY) { y = a.t + maxY; vy = -Math.abs(vy); bounces++; }
+    place();
+    if (bounces > VIP_BOUNCES) { hideVip(); return; } // tras rebotar 5 veces, al tocar el siguiente borde se va
+    vipRaf = requestAnimationFrame(step);
+  };
+  place();
+  vipRaf = requestAnimationFrame(step);
+}
+
+// ====== ESTRELLAS (reinicio con premio) ======
+function starsGain() { return Math.floor(Math.pow(Math.max(0, earnedRun()) / STAR_COST_BASE, 1 / STAR_ROOT) + 1e-9); }
+let starsTimer = null;
+function renderStars() {
+  // aparece al llegar al 70 % del millón necesario (o si ya tienes estrellas)
+  const show = state.stars > 0 || earnedRun() >= REVEAL_RATIO * STAR_COST_BASE;
+  $("tab-btn-stars").style.display = show ? "" : "none";
+  if (!show) { if (currentTab === "stars") setTab("up"); return; }
+  const g = starsGain();
+  const next = Math.pow(g + 1, STAR_ROOT) * STAR_COST_BASE;
+  $("stars-n").textContent = fmt(state.stars);
+  $("stars-sub").textContent = "Cada estrella da +" + Math.round(STAR_BONUS * 100) + " % a toda la producción para siempre (ahora ×" + ((m) => m < 100 ? m.toFixed(2).replace(".", ",") : fmt(m))(1 + STAR_BONUS * state.stars) + "). Si reinicias ahora ganas " + fmt(g) + " ⭐; la siguiente llega al ganar " + fmt(next) + " monedas en esta partida.";
+  if (!starsTimer) $("stars-btn").textContent = "Reiniciar\n+" + fmt(g) + " ⭐";
+  $("stars-btn").disabled = g < 1;
+}
+function doPrestige() {
+  const g = starsGain();
+  if (g < 1) return; // solo se puede reiniciar si ganas al menos 1 estrella
+  const keep = { stars: state.stars + g, buyMode: state.buyMode, lifetime: state.lifetime, casinoLife: state.casinoLife, casinoWins: state.casinoWins, cloneUses: state.cloneUses, taps: state.taps, vips: state.vips, achievements: state.achievements };
+  state = Object.assign(defaultState(), keep); // se conservan estrellas, logros y estadísticas
+  // (estrellas, logros y estadísticas ya están en keep)    // ...pero se conservan las estrellas
+  // el modo de compra también se conserva (va en keep)
+  hideVip(); scheduleVip();
+  save();
+  render();
+}
+$("stars-btn").addEventListener("click", () => {
+  if (starsGain() < 1) return;
+  const b = $("stars-btn");
+  if (!starsTimer) {
+    b.textContent = "¿Seguro?\nPulsa otra vez";
+    starsTimer = setTimeout(() => { starsTimer = null; renderStars(); }, 4000);
+  } else {
+    clearTimeout(starsTimer);
+    starsTimer = null;
+    doPrestige();
+  }
+});
+
+// ====== PESTAÑAS ======
+let currentTab = "up";
+function setTab(t) {
+  currentTab = t;
+  for (const k of ["up", "ach", "stars", "casino"]) $("panel-" + k).style.display = k === t ? "" : "none";
+  document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("on", b.dataset.t === t));
+}
+document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { setTab(b.dataset.t); render(); }));
+
+// ====== LOGROS ======
+function achCount() {
+  let n = 0;
+  for (const a of ACHIEVEMENTS) if (state.achievements[a.id] === true) n++;
+  return n;
+}
+function achValue(a) {
+  switch (a.type) {
+    case "taps": return state.taps;
+    case "lifetime": return earnedLife();
+    case "helpers": return HELPERS.reduce((t, h) => t + owned(h.id), 0);
+    case "kinds": return HELPERS.filter((h) => owned(h.id) >= 1).length;
+    case "upgrades": return UPGRADES.filter((u) => bought(u.id)).length;
+    case "vips": return state.vips;
+    case "stars": return state.stars;
+    case "bought": return bought(a.uid) ? 1 : 0;
+    case "own": return owned(a.uid);
+    case "expands": return UPGRADES.filter((u) => u.type === "expand" && bought(u.id)).length;
+    case "casino": return state.casinoWins;
+    case "clones": return state.cloneUses;
+  }
+  return 0;
+}
+function checkAchievements() {
+  if (casinoBusy) return; // los logros del casino se avisan al terminar la animación, sin adelantar el resultado
+  for (const a of ACHIEVEMENTS) {
+    if (state.achievements[a.id] !== true && achValue(a) >= a.n) {
+      state.achievements[a.id] = true;
+      showToast("🏆 Logro: " + a.name);
+    }
+  }
+}
+const achRows = {};
+function buildAchievements() {
+  const box = $("list-ach");
+  for (const a of ACHIEVEMENTS) {
+    const row = document.createElement("div");
+    row.className = "helper locked";
+    row.innerHTML =
+      '<div class="ico">' + a.emoji + '</div>' +
+      '<div class="info"><div class="name"></div><div class="sub"></div></div>' +
+      '<div class="badge"></div>';
+    row.querySelector(".name").textContent = a.name;
+    row.querySelector(".sub").textContent = a.desc;
+    box.appendChild(row);
+    achRows[a.id] = { row: row, badge: row.querySelector(".badge") };
+  }
+}
+function renderAchievements() {
+  const n = achCount();
+  $("ach-count").textContent = "Logros: " + n + " de " + ACHIEVEMENTS.length + " · +" + Math.round(n * ACH_BONUS * 100) + " % a toda la producción";
+  if (currentTab !== "ach") return;
+  for (const a of ACHIEVEMENTS) {
+    const r = achRows[a.id], done = state.achievements[a.id] === true;
+    r.row.classList.toggle("locked", !done);
+    r.badge.textContent = done ? "✅" : fmt(Math.min(achValue(a), a.n)) + " / " + fmt(a.n);
+  }
+}
+
+// ====== CASINO ======
+let casinoBusy = false, casinoHold = 0, roulSel = null;
+// Orden real de una ruleta europea (37 casillas, de 0 a 36)
+const ROUL_ORDER = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+const COLOR_FILL = { red: "#c62828", black: "#212121", green: "#2e7d32" };
+let wheelRot = 0;
+function polar(r, a) { const t = a * Math.PI / 180; return (100 + r * Math.sin(t)).toFixed(2) + " " + (100 - r * Math.cos(t)).toFixed(2); }
+function buildWheel() {
+  const svg = $("wheel-svg"), NS = "http://www.w3.org/2000/svg", step = 360 / 37;
+  const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  svg.appendChild(mk("circle", { cx: 100, cy: 100, r: 99, fill: "#b8860b" }));
+  ROUL_ORDER.forEach((n, i) => {
+    const a0 = i * step, a1 = (i + 1) * step, mid = (a0 + a1) / 2;
+    const d = "M " + polar(96, a0) + " A 96 96 0 0 1 " + polar(96, a1) + " L " + polar(60, a1) + " A 60 60 0 0 0 " + polar(60, a0) + " Z";
+    svg.appendChild(mk("path", { d: d, fill: COLOR_FILL[rouletteColor(n)], stroke: "#d4af37", "stroke-width": 0.5 }));
+    const p = polar(80, mid).split(" ");
+    const t = mk("text", { x: p[0], y: p[1], "text-anchor": "middle", "dominant-baseline": "central", fill: "#fff", "font-size": 8, "font-weight": 700, transform: "rotate(" + mid + " " + p[0] + " " + p[1] + ")" });
+    t.textContent = n;
+    svg.appendChild(t);
+  });
+  svg.appendChild(mk("circle", { cx: 100, cy: 100, r: 58, fill: "#3e2a14" }));
+}
+// Gira la rueda varias vueltas y la para con la casilla n bajo la flecha (arriba)
+function spinWheelTo(n) {
+  const step = 360 / 37, i = ROUL_ORDER.indexOf(n);
+  const center = (i + 0.5) * step + (Math.random() - 0.5) * step * 0.6;
+  const delta = (((-center - wheelRot) % 360) + 360) % 360;
+  wheelRot += 360 * 5 + delta;
+  const svg = $("wheel-svg");
+  svg.style.transitionDuration = ROULETTE_MS + "ms";
+  svg.style.transform = "rotate(" + wheelRot + "deg)";
+}
+const RED = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+const COLOR_ES = { red: "rojo", black: "negro", green: "verde" };
+const ROUL_OPTS = [
+  { id: "red", label: "🔴 Rojo", mult: PAY_COLOR },
+  { id: "black", label: "⚫ Negro", mult: PAY_COLOR },
+  { id: "d1", label: "1–12", mult: PAY_DOZEN },
+  { id: "d2", label: "13–24", mult: PAY_DOZEN },
+  { id: "d3", label: "25–36", mult: PAY_DOZEN },
+  { id: "num", label: "Número", mult: PAY_NUMBER }
+];
+function rouletteColor(n) { return n === 0 ? "green" : RED.has(n) ? "red" : "black"; }
+// 0 con probabilidad ZERO_CHANCE; si no, un número del 1 al 36 (todos igual de probables)
+function spinRoulette() { return Math.random() < ZERO_CHANCE ? 0 : 1 + Math.floor(Math.random() * 36); }
+// multiplicador que paga la apuesta (0 si pierde); con el 0 pierden color y grupos
+function roulMult(sel, n, pick) {
+  if (sel === "red" || sel === "black") return n !== 0 && rouletteColor(n) === sel ? PAY_COLOR : 0;
+  if (sel === "d1" || sel === "d2" || sel === "d3") return n >= 1 && Math.ceil(n / 12) === Number(sel[1]) ? PAY_DOZEN : 0;
+  if (sel === "num") return n === pick ? (n === 0 ? PAY_ZERO : PAY_NUMBER) : 0;
+  return 0;
+}
+function slotResult(r) {
+  const a = r[0], b = r[1], c = r[2];
+  if (a === b && b === c) return a === 7 ? { mult: SLOT_PAY.triple7, label: "¡Tres 7!" } : { mult: SLOT_PAY.triple, label: "¡Tres iguales!" };
+  const pair = a === b ? a : a === c ? a : b === c ? b : -1;
+  if (pair === 7) { // dos 7: solo pagan si están en casillas consecutivas
+    const together = (a === 7 && b === 7) || (b === 7 && c === 7);
+    return together ? { mult: SLOT_PAY.pair7, label: "¡Dos 7 juntos!" } : { mult: 0, label: "los 7 no están juntos" };
+  }
+  if (pair >= 0) return { mult: SLOT_PAY.pair, label: "¡Dos iguales!" };
+  return { mult: 0, label: "" };
+}
+// Lo que ganas de más (premio - apuesta) suma a los logros de monedas; no cuenta como producción (estrellas)
+// El resultado neto del casino (ganado menos perdido) cuenta para estrellas y logros, pero nunca resta:
+// así no se puede inflar apostando (las pérdidas se descuentan antes de que cuenten las ganancias)
+function earnedRun() { return num(state.totalEarned) + Math.max(0, num(state.casinoRun)); }
+function earnedLife() { return num(state.lifetime) + Math.max(0, num(state.casinoLife)); }
+function applyCasino(amount, win) {
+  state.coins += win - amount;
+  state.casinoRun += win - amount;
+  state.casinoLife += win - amount;
+  if (win > 0) state.casinoWins += 1;
+}
+function setCasinoLocked(on) {
+  document.querySelectorAll("#panel-casino button, #panel-casino input").forEach((el) => { el.disabled = on; });
+}
+// El resultado ya está aplicado a las monedas; casinoHold solo oculta el premio hasta que acaba la animación
+function startCasino(hold) { casinoBusy = true; casinoHold = hold; setCasinoLocked(true); render(); }
+function endCasino() { casinoBusy = false; casinoHold = 0; setCasinoLocked(false); render(); }
+function readBet(msg) {
+  const v = Math.floor(Number($("bet").value));
+  if (!Number.isFinite(v) || v < 1) { msg.textContent = "Apuesta mínima: 1."; return 0; }
+  if (v > Math.floor(state.coins)) { msg.textContent = "No tienes tantas monedas."; return 0; }
+  return v;
+}
+function selectRoul(id) {
+  roulSel = id;
+  document.querySelectorAll("#roul-opts .chip").forEach((c) => c.classList.toggle("on", c.dataset.bet === id));
+}
+function playRoulette() {
+  if (casinoBusy) return;
+  const msg = $("roul-msg");
+  msg.textContent = "";
+  if (!roulSel) { msg.textContent = "Elige una apuesta."; return; }
+  let pick = -1;
+  if (roulSel === "num") {
+    const raw = $("roul-num").value.trim();
+    pick = Number(raw);
+    if (raw === "" || !Number.isInteger(pick) || pick < 0 || pick > 36) { msg.textContent = "Escribe un número del 0 al 36."; return; }
+  }
+  const amount = readBet(msg);
+  if (!amount) return;
+  const n = spinRoulette(), mult = roulMult(roulSel, n, pick), win = amount * mult;
+  applyCasino(amount, win); // se resuelve ya: si cierras la pestaña no pierdes el premio
+  startCasino(win);
+  const ball = $("roul-ball");
+  const paint = (k) => { ball.textContent = k; ball.className = "hub " + rouletteColor(k); };
+  ball.textContent = "…";
+  ball.className = "hub";
+  spinWheelTo(n);
+  setTimeout(() => {
+    paint(n);
+    msg.textContent = "Salió " + n + " " + COLOR_ES[rouletteColor(n)] + ". " + (win > 0 ? "¡Ganas! Cobras " + fmt(win) + "." : "Pierdes " + fmt(amount) + ".");
+    endCasino();
+  }, ROULETTE_MS);
+}
+function playSlot() {
+  if (casinoBusy) return;
+  const msg = $("slot-msg");
+  msg.textContent = "";
+  const amount = readBet(msg);
+  if (!amount) return;
+  const res = [0, 1, 2].map(() => Math.floor(Math.random() * SLOT_SYMBOLS));
+  const out = slotResult(res), win = amount * out.mult;
+  applyCasino(amount, win);
+  startCasino(win);
+  const stopped = [false, false, false];
+  const t = setInterval(() => {
+    for (let i = 0; i < 3; i++) if (!stopped[i]) $("reel" + i).textContent = Math.floor(Math.random() * SLOT_SYMBOLS);
+  }, 60);
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      stopped[i] = true;
+      $("reel" + i).textContent = res[i];
+      if (i === 2) {
+        clearInterval(t);
+        msg.textContent = win > 0 ? out.label + " Cobras " + fmt(win) + "." : "Sin premio" + (out.label ? " (" + out.label + ")" : "") + ". Pierdes " + fmt(amount) + ".";
+        endCasino();
+      }
+    }, SLOT_STOP_MS[i]);
+  }
+}
+function setupCasino() {
+  buildWheel();
+  const box = $("roul-opts");
+  for (const o of ROUL_OPTS) {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.bet = o.id;
+    b.textContent = o.label + " ×" + o.mult;
+    b.addEventListener("click", () => selectRoul(o.id));
+    box.appendChild(b);
+  }
+  $("roul-num").addEventListener("input", () => selectRoul("num"));
+  $("roul-info").textContent = "El 0 verde sale el 1 % de las veces y paga ×" + PAY_ZERO + ". Con el 0 pierden rojo, negro y los grupos.";
+  $("slot-info").textContent = "Dos iguales (sin 7): ×" + SLOT_PAY.pair + "\nDos 7 juntos: ×" + SLOT_PAY.pair7 + "\nTres iguales (sin 7): ×" + SLOT_PAY.triple + "\nTres 7: ×" + SLOT_PAY.triple7 + "\nNúmeros del 0 al " + (SLOT_SYMBOLS - 1) + ". Dos 7 separados no pagan.";
+  document.querySelectorAll("#panel-casino [data-b]").forEach((b) => b.addEventListener("click", () => {
+    const cur = Math.floor(Number($("bet").value)) || 1, max = Math.max(1, Math.floor(state.coins));
+    const v = { min: 1, half: Math.floor(cur / 2), dbl: cur * 2, all: max }[b.dataset.b];
+    $("bet").value = Math.min(max, Math.max(1, v));
+  }));
+  $("roul-go").addEventListener("click", playRoulette);
+  $("slot-go").addEventListener("click", playSlot);
+}
+
+// ====== CLONACIÓN DEL CURSOR ======
+// Al activarla (10 s), cada toque crea un cursor fantasma que copia tu movimiento con 0,5 s de retraso
+// y repite cada toque que hagas después. Cuantos más toques rápidos, más fantasmas y más ganas.
+const CLONE_SECONDS = 10, CLONE_DELAY_MS = 500, CLONE_MAX_GHOSTS = 20;
+let cloneUntil = 0, ghosts = [], ghostRaf = 0, cloneTimer = 0, lastPtr = null;
+const trail = []; // recorrido reciente del ratón o del dedo
+function recPointer(e) {
+  const t = performance.now();
+  lastPtr = { x: e.clientX, y: e.clientY, t: t };
+  trail.push(lastPtr);
+  while (trail.length && t - trail[0].t > 2000) trail.shift();
+}
+window.addEventListener("pointermove", recPointer, { passive: true });
+window.addEventListener("pointerdown", recPointer, { passive: true });
+// dónde estaba el puntero en el instante t
+function ptrAt(t) {
+  if (!trail.length) return lastPtr || { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  if (t <= trail[0].t) return trail[0];
+  for (let i = 1; i < trail.length; i++) {
+    if (trail[i].t >= t) {
+      const a = trail[i - 1], b = trail[i], f = (t - a.t) / Math.max(1, b.t - a.t);
+      return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
+    }
+  }
+  return trail[trail.length - 1];
+}
+function cloneActive() { return cloneUntil > Date.now(); }
+function spawnGhost() {
+  const el = document.createElement("div");
+  el.className = "ghost";
+  el.textContent = "👆";
+  document.body.appendChild(el);
+  ghosts.push({ el: el, dx: (Math.random() - 0.5) * 80, dy: (Math.random() - 0.5) * 80 });
+  if (!ghostRaf) ghostRaf = requestAnimationFrame(ghostLoop);
+}
+function ghostLoop() {
+  ghostRaf = 0;
+  if (!ghosts.length) return;
+  const p = ptrAt(performance.now() - CLONE_DELAY_MS);
+  for (const g of ghosts) g.el.style.transform = "translate(" + (p.x + g.dx - 12).toFixed(1) + "px," + (p.y + g.dy - 12).toFixed(1) + "px)";
+  ghostRaf = requestAnimationFrame(ghostLoop);
+}
+function clearGhosts() {
+  cancelAnimationFrame(ghostRaf);
+  ghostRaf = 0;
+  ghosts.forEach((g) => g.el.remove());
+  ghosts = [];
+}
+function cloneTap(tv) {
+  if (!cloneActive()) return;
+  const k = ghosts.length; // los fantasmas que ya existen repiten este toque
+  if (k > 0) {
+    setTimeout(() => {
+      const g = k * tv;
+      addCoins(g);
+      const z = $("zone"), f = document.createElement("div");
+      f.className = "float ghostf";
+      f.textContent = "👻+" + fmtRate(g);
+      f.style.left = 20 + Math.random() * Math.max(10, z.clientWidth - 110) + "px";
+      f.style.top = "10px";
+      z.appendChild(f);
+      setTimeout(() => f.remove(), 800);
+      render();
+    }, CLONE_DELAY_MS);
+  }
+  if (k < CLONE_MAX_GHOSTS) spawnGhost(); // y este toque crea uno nuevo
+}
+function activateClone() {
+  const now = Date.now();
+  if (cloneActive() || state.coins < state.cloneCost) return; // cada uso se paga
+  state.coins -= state.cloneCost;
+  state.cloneCost *= 2; // y el siguiente cuesta el doble
+  state.cloneUses += 1;
+  cloneUntil = now + CLONE_SECONDS * 1000;
+  clearTimeout(cloneTimer);
+  cloneTimer = setTimeout(() => { cloneUntil = 0; clearGhosts(); render(); }, CLONE_SECONDS * 1000);
+  save();
+  render();
+}
+function renderClone() {
+  // aparece al tener el 70 % de lo que cuesta el próximo uso, y ya no se oculta
+  if (!state.revealed.clon && state.coins >= REVEAL_RATIO * state.cloneCost) state.revealed.clon = true;
+  const own = state.revealed.clon === true;
+  if (cloneUntil && !cloneActive()) { cloneUntil = 0; clearGhosts(); }
+  $("clone").style.display = own ? "" : "none";
+  if (!own) return;
+  const now = Date.now(), btn = $("clone-btn"), sub = $("clone-sub");
+  if (cloneActive()) {
+    btn.disabled = true;
+    btn.textContent = "👻 Activa: " + Math.ceil((cloneUntil - now) / 1000) + " s";
+    sub.textContent = "Cada toque crea un fantasma (" + ghosts.length + " de " + CLONE_MAX_GHOSTS + ")";
+  } else {
+    btn.disabled = state.coins < state.cloneCost;
+    btn.textContent = "👻 Activar Clonación del Cursor · 🪙 " + fmt(state.cloneCost);
+    sub.textContent = CLONE_SECONDS + " s · cada uso cuesta el doble que el anterior";
+  }
+}
+$("clone-btn").addEventListener("click", activateClone);
+
+// ====== TOQUE ======
+$("bread").addEventListener("click", (e) => {
+  const tv = tapValue();
+  state.taps += 1;
+  addCoins(tv);
+  cloneTap(tv);
+  const zone = $("zone"), rect = zone.getBoundingClientRect();
+  const f = document.createElement("div");
+  f.className = "float";
+  f.textContent = "+" + fmtRate(tv);
+  const x = e.clientX ? e.clientX - rect.left : rect.width / 2;
+  const y = e.clientY ? e.clientY - rect.top : rect.height / 2;
+  f.style.left = x - 10 + "px";
+  f.style.top = y - 20 + "px";
+  zone.appendChild(f);
+  setTimeout(() => f.remove(), 800);
+  render();
+});
+
+// ====== BORRAR PARTIDA (2 pasos, sin ventanas emergentes) ======
+let resetTimer = null;
+$("reset").addEventListener("click", () => {
+  const b = $("reset");
+  if (!resetTimer) {
+    b.textContent = "¿Seguro? Pulsa otra vez";
+    resetTimer = setTimeout(() => { b.textContent = "Borrar partida"; resetTimer = null; }, 4000);
+  } else {
+    clearTimeout(resetTimer); resetTimer = null;
+    b.textContent = "Borrar partida";
+    state = defaultState();
+    save();
+    render();
+  }
+});
+
+// ====== ARRANQUE ======
+buildHelpers();
+buildUpgrades();
+buildAchievements();
+setupCasino();
+load();
+$("away-ok").addEventListener("click", () => { $("away").style.display = "none"; });
+document.querySelectorAll(".mode").forEach((m) => m.addEventListener("click", () => { state.buyMode = m.dataset.m; render(); }));
+render();
+scheduleVip();
+tick(); // si vienes de estar fuera, el progreso offline se calcula ahora mismo
+setInterval(tick, 100);
+setInterval(save, AUTOSAVE_MS);
+document.addEventListener("visibilitychange", () => { if (document.hidden) save(); });
+window.addEventListener("pagehide", save);
+</script>
+</body>
+</html>
