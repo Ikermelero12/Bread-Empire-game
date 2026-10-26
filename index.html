@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bread Empire</title>
+<style>
+:root{--bg:#fff4e0;--card:#ffffff;--ink:#3b2a1a;--muted:#8a7560;--accent:#d9822b;--accent-ink:#ffffff;--line:#ecd9bd;--off:#e6dccb;--off-ink:#a39583;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1610;--card:#2b2018;--ink:#f5e6d0;--muted:#b09a82;--accent:#e8953f;--accent-ink:#1e1610;--line:#433325;--off:#3a2e24;--off-ink:#7d6c5a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1e1610;--card:#2b2018;--ink:#f5e6d0;--muted:#b09a82;--accent:#e8953f;--accent-ink:#1e1610;--line:#433325;--off:#3a2e24;--off-ink:#7d6c5a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center}
+main{width:100%;max-width:480px;padding:16px}
+h1{font-size:1.2rem;margin:0 0 12px;text-align:center}
+.stats{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.coins{font-size:2.2rem;font-weight:800;line-height:1.1}
+.rate{color:var(--muted);margin-top:4px}
+.tap-zone{position:relative;display:flex;justify-content:center;padding:22px 0}
+#bread{width:min(60vw,220px);height:min(60vw,220px);border-radius:50%;border:6px solid var(--accent);background:var(--card);font-size:min(28vw,110px);cursor:pointer;touch-action:manipulation;user-select:none;transition:transform .08s}
+#bread:active{transform:scale(.93)}
+.float{position:absolute;font-weight:800;color:var(--accent);pointer-events:none;animation:up .8s ease-out forwards}
+@keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+h2{font-size:1rem;margin:8px 0}
+.helper{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.helper .ico{font-size:2rem}
+.helper .info{flex:1;min-width:0}
+.helper .name{font-weight:700}
+.helper .sub{color:var(--muted);font-size:.85rem}
+.buy{border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:10px 14px;min-width:104px;white-space:pre-line;line-height:1.25;cursor:pointer;font-size:.95rem}
+.buy:disabled{background:var(--off);color:var(--off-ink);cursor:not-allowed}
+.foot{text-align:center;margin-top:18px}
+.reset{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer}
+.ver{color:var(--muted);font-size:.75rem;margin-top:8px}
+.modes{display:flex;gap:8px;margin-bottom:10px}
+.mode{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 0;font-weight:700;cursor:pointer;font-size:.95rem}
+.mode.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:360px;width:100%;text-align:center}
+.modal h3{margin:6px 0 10px;font-size:1.15rem}
+.modal p{margin:6px 0}
+.modal .muted{color:var(--muted);font-size:.8rem}
+.away-coins{font-size:2rem;font-weight:800;margin:8px 0}
+.tabs{display:flex;gap:6px;margin:6px 0 12px}
+.tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 4px;font-weight:700;cursor:pointer;font-size:.9rem}
+.tab.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.badge{font-size:.85rem;font-weight:700;color:var(--muted);min-width:64px;text-align:right}
+.helper.locked{opacity:.6}
+.helper.locked .ico{filter:grayscale(1)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.card h2{margin:0 0 8px}
+.card .sub{color:var(--muted);font-size:.8rem;margin:4px 0}
+.betrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.betrow input{width:96px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:1rem}
+.mini,.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mini:disabled,.chip:disabled,.betrow input:disabled{opacity:.55;cursor:not-allowed}
+.wheelbox{position:relative;width:min(80vw,300px);aspect-ratio:1;margin:14px auto 10px}
+#wheel-svg{width:100%;height:100%;display:block;border-radius:50%;box-shadow:0 4px 14px rgba(0,0,0,.4);transition-property:transform;transition-timing-function:cubic-bezier(.15,.65,.1,1);transition-duration:0s}
+.pointer{position:absolute;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:20px solid var(--accent);z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;height:30%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#fff;background:#555;border:4px solid var(--accent);z-index:1}
+.hub.red{background:#c62828}
+.hub.black{background:#212121}
+.hub.green{background:#2e7d32}
+#slot-info{white-space:pre-line}
+.clone{margin:0 0 10px}
+.clone .sub{color:var(--muted);font-size:.8rem;text-align:center;margin-top:4px}
+.ghost{position:fixed;left:0;top:0;z-index:30;font-size:1.9rem;pointer-events:none;opacity:.65;will-change:transform}
+.float.ghostf{color:#8e7cc3}
+.reels{display:flex;gap:10px;justify-content:center;margin:10px 0}
+.reel{width:72px;height:84px;font-size:2.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--bg);border:3px solid var(--accent);border-radius:12px}
+.big{width:100%;padding:12px;font-size:1rem}
+.msg{margin-top:8px;font-weight:700;min-height:1.3em}
+.vip{position:fixed;left:0;top:0;z-index:40;width:70px;height:70px;padding:0;font-size:2.4rem;background:var(--accent);border:3px solid var(--card);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;will-change:transform;touch-action:manipulation;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:10px 16px;border-radius:12px;z-index:60;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <h1>🥖 Bread Empire</h1>
+  <section class="stats">
+    <div class="coins">🪙 <span id="coins">0</span></div>
+    <div class="rate"><span id="cps">0</span> monedas por segundo · +<span id="tapv">1</span> por toque</div>
+  </section>
+  <div class="tap-zone" id="zone">
+    <button id="bread" aria-label="Hacer pan">🍞</button>
+  </div>
+  <div class="clone" id="clone" style="display:none"><button class="buy big" id="clone-btn"></button><div class="sub" id="clone-sub"></div></div>
+  <div class="tabs">
+    <button class="tab on" data-t="up">🛒 Mejoras</button>
+    <button class="tab" data-t="ach">🏆 Logros</button>
+    <button class="tab" data-t="stars" id="tab-btn-stars" style="display:none">⭐ Estrellas</button>
+    <button class="tab" data-t="casino">🎰 Casino</button>
+  </div>
+  <div class="panel" id="panel-up">
+  <div class="modes"><button class="mode" data-m="1">×1</button><button class="mode" data-m="10">×10</button><button class="mode" data-m="max">Máx</button></div>
+  <h2 id="h-auto">Mejoras automáticas</h2>
+  <div id="list-auto"></div>
+  <h2 id="h-bonus">Mejoras de bonus</h2>
+  <div id="list-bonus"></div>
+  <h2 id="h-up">Mejoras especiales</h2>
+  <div id="list-up"></div>
+  <div class="ver" id="up-count"></div>
+  </div>
+  <div class="panel" id="panel-ach" style="display:none">
+    <div class="ver" id="ach-count" style="margin:0 0 10px"></div>
+    <div id="list-ach"></div>
+  </div>
+  <div class="panel" id="panel-stars" style="display:none">
+  <h2 id="h-stars">⭐ Estrellas</h2>
+  <div class="helper" id="stars-box">
+    <div class="ico">⭐</div>
+    <div class="info"><div class="name">Tienes <span id="stars-n">0</span> ⭐</div><div class="sub" id="stars-sub"></div></div>
+    <button class="buy" id="stars-btn"></button>
+  </div>
+  </div>
+  <div class="panel" id="panel-casino" style="display:none">
+    <div class="card">
+      <b>Tu apuesta</b>
+      <div class="betrow">
+        <input id="bet" type="number" min="1" step="1" inputmode="numeric" value="10">
+        <button class="mini" data-b="min" title="Apuesta mínima: 1 moneda">Mín</button><button class="mini" data-b="half" title="La mitad de lo que tenías puesto">Mitad</button><button class="mini" data-b="dbl" title="El doble de lo que tenías puesto">Doble</button><button class="mini" data-b="all" title="Todas tus monedas">Todo</button>
+      </div>
+      <div class="sub">Si ganas, cobras tu apuesta × el número (×2 = el doble). Si pierdes, la pierdes.</div>
+      <div class="sub">Tus ganancias netas (lo que ganas menos lo que pierdes) cuentan para estrellas y logros.</div>
+    </div>
+    <div class="card">
+      <h2>🎡 Ruleta</h2>
+      <div class="sub">Elige una apuesta y gira. Gana el número bajo la flecha.</div>
+      <div class="wheelbox"><div class="pointer"></div><svg id="wheel-svg" viewBox="0 0 200 200"></svg><div class="hub" id="roul-ball">?</div></div>
+      <div class="chips" id="roul-opts"></div>
+      <div class="betrow"><input id="roul-num" type="number" min="0" max="36" step="1" inputmode="numeric" placeholder="0–36"><span class="sub">← tu número (0–36)</span></div>
+      <div class="sub" id="roul-info"></div>
+      <button class="buy big" id="roul-go">Girar</button>
+      <div class="msg" id="roul-msg"></div>
+    </div>
+    <div class="card">
+      <h2>🎰 Tragaperras</h2>
+      <div class="reels"><div class="reel" id="reel0">?</div><div class="reel" id="reel1">?</div><div class="reel" id="reel2">?</div></div>
+      <div class="sub" id="slot-info"></div>
+      <button class="buy big" id="slot-go">Tirar</button>
+      <div class="msg" id="slot-msg"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="foot">
+    <button class="reset" id="reset">Borrar partida</button>
+    <div class="ver">Se guarda sola cada 10 segundos</div>
+  </div>
+</main>
+<div class="overlay" id="away" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div style="font-size:2.4rem">🌙</div>
+    <h3>¡Mientras no estabas, tu panadería trabajó!</h3>
+    <p>Estuviste fuera <b id="away-time"></b> y ganaste</p>
+    <div class="away-coins">🪙 <span id="away-coins">0</span></div>
+    <p class="muted">Sin ti trabaja a medio ritmo y hasta un máximo de 8 horas.</p>
+    <button class="buy" id="away-ok">¡Genial!</button>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
