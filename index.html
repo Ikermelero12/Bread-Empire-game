@@ -42,7 +42,9 @@ h2{font-size:1rem;margin:8px 0}
 .modal p{margin:6px 0}
 .modal .muted{color:var(--muted);font-size:.8rem}
 .away-coins{font-size:2rem;font-weight:800;margin:8px 0}
-.tabs{display:flex;gap:6px;margin:6px 0 12px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+@media (max-width:440px){.tab{font-size:.78rem;padding:9px 2px}}
+.betrow input.range{flex:1;width:auto;padding:0;accent-color:var(--accent)}
 .tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 4px;font-weight:700;cursor:pointer;font-size:.9rem}
 .tab.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .badge{font-size:.85rem;font-weight:700;color:var(--muted);min-width:64px;text-align:right}
@@ -94,6 +96,7 @@ h2{font-size:1rem;margin:8px 0}
     <button class="tab" data-t="ach">🏆 Logros</button>
     <button class="tab" data-t="stars" id="tab-btn-stars" style="display:none">⭐ Estrellas</button>
     <button class="tab" data-t="casino">🎰 Casino</button>
+    <button class="tab" data-t="settings">⚙️ Ajustes</button>
   </div>
   <div class="panel" id="panel-up">
   <div class="modes"><button class="mode" data-m="1">×1</button><button class="mode" data-m="10">×10</button><button class="mode" data-m="max">Máx</button></div>
@@ -143,6 +146,18 @@ h2{font-size:1rem;margin:8px 0}
       <div class="sub" id="slot-info"></div>
       <button class="buy big" id="slot-go">Tirar</button>
       <div class="msg" id="slot-msg"></div>
+    </div>
+  </div>
+  <div class="panel" id="panel-settings" style="display:none">
+    <div class="card">
+      <h2>🔢 Cifras de los números</h2>
+      <div class="sub">Elige cuántas cifras se ven en tu dinero y en los precios (de 3 a 9). Con más cifras ves el número más exacto.</div>
+      <div class="betrow">
+        <input id="digits-range" class="range" type="range" min="3" max="9" step="1" value="3" aria-label="Cifras que se muestran">
+        <b id="digits-val">3</b>
+      </div>
+      <div class="sub">Ejemplo: 1.234.567.890 → <b id="digits-ex"></b></div>
+      <div class="sub">Ejemplo: 123.456 → <b id="digits-ex2"></b></div>
     </div>
   </div>
   <div class="toast" id="toast"></div>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bread Empire",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Un juego de construir tu imperio del pan. ¡Haz clic en el icono para jugar!",
   "action": { "default_title": "Jugar a Bread Empire" },
   "background": { "service_worker": "background.js" },

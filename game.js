@@ -134,7 +134,7 @@ const ACHIEVEMENTS = [
 
 // ====== ESTADO ======
 function defaultState() {
-  return { version: VERSION, coins: 0, totalEarned: 0, owned: {}, revealed: {}, upgrades: {}, stars: 0, lifetime: 0, taps: 0, vips: 0, achievements: {}, cloneCost: CLONE_BASE_COST, casinoRun: 0, casinoLife: 0, casinoWins: 0, cloneUses: 0, buyMode: "1", lastTick: Date.now() };
+  return { version: VERSION, coins: 0, totalEarned: 0, owned: {}, revealed: {}, upgrades: {}, stars: 0, lifetime: 0, taps: 0, vips: 0, achievements: {}, cloneCost: CLONE_BASE_COST, casinoRun: 0, casinoLife: 0, casinoWins: 0, cloneUses: 0, buyMode: "1", digits: 3, lastTick: Date.now() };
 }
 let state = defaultState();
 
@@ -142,15 +142,17 @@ function num(n, fallback) { return Number.isFinite(n) ? n : (fallback || 0); }
 
 // ====== FORMATO DE NÚMEROS ======
 const SUF = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+function digitsSetting() { return Math.min(9, Math.max(3, Math.floor(num(state.digits, 3)))); }
 function fmt(n) {
   n = Math.max(0, num(n));
-  if (n < 1000) return String(Math.floor(n));
+  const D = digitsSetting();              // cifras que se enseñan (3 a 9)
+  if (n < Math.pow(10, D)) return String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   const i = Math.min(Math.floor(Math.log10(n) / 3), SUF.length - 1);
   const v = n / Math.pow(1000, i);
-  let s;
-  if (v < 10) s = (Math.floor(v * 100) / 100).toFixed(2);
-  else if (v < 100) s = (Math.floor(v * 10) / 10).toFixed(1);
-  else s = String(Math.floor(v));
+  const intDigits = String(Math.floor(v)).length;
+  const dec = Math.max(0, D - intDigits);  // el resto de cifras van como decimales
+  const p = Math.pow(10, dec);
+  const s = dec > 0 ? (Math.floor(v * p * (1 + 1e-12)) / p).toFixed(dec) : String(Math.floor(v));
   return s.replace(".", ",") + SUF[i];
 }
 function fmtRate(n) {
@@ -313,6 +315,7 @@ function load() {
     s.casinoWins = Math.max(0, Math.floor(num(d.casinoWins)));
     s.cloneUses = Math.max(0, Math.floor(num(d.cloneUses)));
     s.stars = Math.max(0, Math.floor(num(d.stars)));
+    s.digits = Math.min(9, Math.max(3, Math.floor(num(d.digits, 3))));
     const t = num(d.lastTick, 0);
     if (t > 0 && t <= Date.now()) s.lastTick = t; // si es del futuro (reloj raro) se ignora
     state = s; // el tick de arranque calcula el progreso offline
@@ -501,7 +504,7 @@ function renderStars() {
 function doPrestige() {
   const g = starsGain();
   if (g < 1) return; // solo se puede reiniciar si ganas al menos 1 estrella
-  const keep = { stars: state.stars + g, buyMode: state.buyMode, lifetime: state.lifetime, casinoLife: state.casinoLife, casinoWins: state.casinoWins, cloneUses: state.cloneUses, taps: state.taps, vips: state.vips, achievements: state.achievements };
+  const keep = { stars: state.stars + g, buyMode: state.buyMode, digits: state.digits, lifetime: state.lifetime, casinoLife: state.casinoLife, casinoWins: state.casinoWins, cloneUses: state.cloneUses, taps: state.taps, vips: state.vips, achievements: state.achievements };
   state = Object.assign(defaultState(), keep); // se conservan estrellas, logros y estadísticas
   // (estrellas, logros y estadísticas ya están en keep)    // ...pero se conservan las estrellas
   // el modo de compra también se conserva (va en keep)
@@ -526,7 +529,7 @@ $("stars-btn").addEventListener("click", () => {
 let currentTab = "up";
 function setTab(t) {
   currentTab = t;
-  for (const k of ["up", "ach", "stars", "casino"]) $("panel-" + k).style.display = k === t ? "" : "none";
+  for (const k of ["up", "ach", "stars", "casino", "settings"]) $("panel-" + k).style.display = k === t ? "" : "none";
   document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("on", b.dataset.t === t));
 }
 document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { setTab(b.dataset.t); render(); }));
@@ -884,10 +887,23 @@ $("reset").addEventListener("click", () => {
   } else {
     clearTimeout(resetTimer); resetTimer = null;
     b.textContent = "Borrar partida";
-    state = defaultState();
+    state = Object.assign(defaultState(), { digits: state.digits }); // el ajuste de cifras no se borra
     save();
     render();
   }
+});
+
+// ====== AJUSTES ======
+function syncSettings() {
+  const d = digitsSetting();
+  $("digits-range").value = d;
+  $("digits-val").textContent = d;
+  $("digits-ex").textContent = fmt(1234567890);
+  $("digits-ex2").textContent = fmt(123456);
+}
+$("digits-range").addEventListener("input", (e) => {
+  state.digits = Math.min(9, Math.max(3, Math.floor(num(Number(e.target.value), 3))));
+  syncSettings(); save(); render();
 });
 
 // ====== ARRANQUE ======
@@ -896,6 +912,7 @@ buildUpgrades();
 buildAchievements();
 setupCasino();
 load();
+syncSettings();
 $("away-ok").addEventListener("click", () => { $("away").style.display = "none"; });
 document.querySelectorAll(".mode").forEach((m) => m.addEventListener("click", () => { state.buyMode = m.dataset.m; render(); }));
 render();
